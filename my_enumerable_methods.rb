@@ -13,5 +13,14 @@ module Enumerable
     end
   end
 
+  def my_select
+    results = []
+    my_each do |element|
+      results << element if yield element
+    end
+    results
+  end
+
 end
+
 
