@@ -21,6 +21,10 @@ module Enumerable
     results
   end
 
+  def my_all?
+    my_each { |element| return (yield element) }
+  end
+
 end
 
 
