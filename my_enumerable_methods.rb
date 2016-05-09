@@ -25,6 +25,11 @@ module Enumerable
     my_each { |element| return (yield element) }
   end
 
+  def my_any?
+    self.my_each do |element| 
+      block_given? ? (yield element) : (return true if element)
+    end
+    false
+  end
+
 end
-
-
