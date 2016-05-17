@@ -151,7 +151,42 @@ module Enumerable
   def my_map
     results = []
     self.my_each do |element|
-      block_given? ? results << (yield element) : self.to_enum
+      block_given? ? results << (yield element) : (return self.to_enum)
+    end
+    results
+  end
+
+  # my_map modified to take a proc instead
+
+  # proc = Proc.new { |i| i*i }
+  # p (1..4).my_map(&proc) #=> [1, 4, 9, 16]
+
+  def my_map(&proc)
+    results = []
+    self.my_each do |element|
+      block_given? ? results << (proc.call(element)) : (return self.to_enum)
+    end
+    results
+  end
+
+  # my_map modified to take either a block, a proc or both,
+  # but executing the block only if both are supplied 
+  # (in which case it executes both the block AND the proc).
+
+  # proc = Proc.new { |i| i * i }
+  # (1..4).my_map(proc) #=> [1, 4, 9, 16]
+  # (1..4).my_map(proc) { |i| i + i } #=> [2, 8, 18, 32]
+
+  def my_map(proc=nil, &block)
+    results = []
+    if proc && block.nil?
+      my_each { |element| results << (proc.call(element)) }
+    elsif proc && block_given?
+      proc_results = []
+      my_each { |element| proc_results << (proc.call(element)) }
+      proc_results.my_each { |element| results << (yield element) }
+    else
+      return self.to_enum
     end
     results
   end
@@ -205,5 +240,10 @@ module Enumerable
     memo
   end
 
-
 end
+
+def multiply_els(array)
+  array.my_inject(:*)
+end
+
+p multiply_els([2,4,5])
