@@ -31,7 +31,7 @@ module Enumerable
 
 # select (alias find_all)
 
-  # find_all { |obj| block } → array click to toggle source
+  # find_all { |obj| block } → array
   # find_all → an_enumerator
   # Returns an array containing all elements of enum for which
   # the given block returns a true value.
@@ -43,9 +43,11 @@ module Enumerable
   def my_select
     return self.to_enum unless block_given?
     results = []
-    self.my_each { |element| results << element if yield element }
+    my_each { |element| results << element if yield element }
     results
   end
+
+  alias_method :my_find_all, :my_select 
 
 # all?
 
@@ -61,8 +63,8 @@ module Enumerable
   # [nil, true, 99].all?                              #=> false
 
   def my_all?
-    self.my_each do |element| 
-      return false unless (yield element) if block_given? 
+    my_each do |element|
+      (return false unless (yield element)) if block_given?
       return false unless element
     end
     return true
@@ -70,7 +72,7 @@ module Enumerable
 
 # any?
 
-  # any? [{ |obj| block }] → true or false click to toggle source
+  # any? [{ |obj| block }] → true or false
   # Passes each element of the collection to the given block.
   # The method returns true if the block ever returns a value other than false
   # or nil. If the block is not given, Ruby adds an implicit block of 
@@ -82,15 +84,15 @@ module Enumerable
   # [nil, true, 99].any?                              #=> true
 
   def my_any?
-    self.my_each do |element| 
-      block_given? ? (yield element) : (return true if element)
+    my_each do |element| 
+      block_given? ? (return true if yield element) : (return true if element)
     end
     false
   end
 
 # none?
 
-  #  none? [{ |obj| block }] → true or false
+  # none? [{ |obj| block }] → true or false
   # Passes each element of the collection to the given block.
   # The method returns true if the block never returns true for all elements.
   # If the block is not given, none? will return true only if 
@@ -101,7 +103,6 @@ module Enumerable
   # [].none?                                           #=> true
   # [nil].none?                                        #=> true
   # [nil, false].none?                                 #=> true
-
 
   def my_none?
     self.my_each do |element|
@@ -128,10 +129,10 @@ module Enumerable
   def my_count(num=nil)
     count = 0
     if block_given?
-      self.my_each { |element| count += 1 if (yield element) }
+      my_each { |element| count += 1 if (yield element) }
       return count
     elsif num
-      self.my_each { |element| count += 1 if element == num }  
+      my_each { |element| count += 1 if element == num }  
       return count
     else
       self.length
@@ -150,7 +151,7 @@ module Enumerable
 
   def my_map
     results = []
-    self.my_each do |element|
+    my_each do |element|
       block_given? ? results << (yield element) : (return self.to_enum)
     end
     results
@@ -158,13 +159,28 @@ module Enumerable
 
   # my_map modified to take a proc instead
 
-  # proc = Proc.new { |i| i*i }
-  # p (1..4).my_map(&proc) #=> [1, 4, 9, 16]
+  proc = Proc.new { |i| i*i }
+  p (1..4).my_map(&proc) #=> [1, 4, 9, 16]
 
   def my_map(&proc)
     results = []
-    self.my_each do |element|
+    my_each do |element|
       block_given? ? results << (proc.call(element)) : (return self.to_enum)
+    end
+    results
+  end
+
+  # my_map modified to take either a block, a proc or both,
+  # but executing only the proc if both are supplied.
+
+  # proc = Proc.new { |i| i * i }
+  # (1..4).my_map(proc) #=> [1, 4, 9, 16]
+  # (1..4).my_map(proc) { |i| i + i } #=> [1, 4, 9, 16]
+
+  def my_map(proc=nil, &block)
+    results = []
+    my_each do |element| 
+      proc ? results << (proc.call(element)) : (return self.to_enum)
     end
     results
   end
@@ -240,10 +256,10 @@ module Enumerable
     memo
   end
 
+  alias_method :my_reduce, :my_inject 
+
 end
 
 def multiply_els(array)
   array.my_inject(:*)
 end
-
-p multiply_els([2,4,5])
