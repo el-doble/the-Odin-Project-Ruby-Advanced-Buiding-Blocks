@@ -105,7 +105,7 @@ module Enumerable
   # [nil, false].none?                                 #=> true
 
   def my_none?
-    self.my_each do |element|
+    my_each do |element|
       block_given? ? (return false if yield element) : (return false if element)
     end
     true
